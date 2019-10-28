@@ -3,8 +3,23 @@
 #include <AP_GPS/AP_GPS.h>
 #include <AP_Compass/AP_Compass.h>
 #include <AP_Baro/AP_Baro.h>
+#include <AP_Airspeed/AP_Airspeed.h>
+#include <AP_RangeFinder/AP_RangeFinder.h>
+#include <AP_Common/AP_FWVersion.h>
+#include "version.h"
+#include "../AP_Bootloader/app_comms.h"
+
+#if defined(HAL_PERIPH_NEOPIXEL_COUNT) || defined(HAL_PERIPH_ENABLE_NCP5623_LED)
+#define AP_PERIPH_HAVE_LED
+#endif
+
 #include "Parameters.h"
 #include "ch.h"
+
+/*
+  app descriptor compatible with MissionPlanner
+ */
+extern const struct app_descriptor app_descriptor;
 
 class AP_Periph_FW {
 public:
@@ -18,6 +33,8 @@ public:
     void can_mag_update();
     void can_gps_update();
     void can_baro_update();
+    void can_airspeed_update();
+    void can_rangefinder_update();
 
     void load_parameters();
 
@@ -44,6 +61,14 @@ public:
         mavlink_status_t status;
     } adsb;
 #endif
+
+#ifdef HAL_PERIPH_ENABLE_AIRSPEED
+    AP_Airspeed airspeed;
+#endif
+
+#ifdef HAL_PERIPH_ENABLE_RANGEFINDER
+    RangeFinder rangefinder;
+#endif
     
     // setup the var_info table
     AP_Param param_loader{var_info};
@@ -53,6 +78,7 @@ public:
     uint32_t last_mag_update_ms;
     uint32_t last_gps_update_ms;
     uint32_t last_baro_update_ms;
+    uint32_t last_airspeed_update_ms;
 };
 
 extern AP_Periph_FW periph;
